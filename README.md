@@ -1,3 +1,12 @@
+
+- [aws-eks-private](#aws-eks-private)
+- [Overview](#overview)
+  - [AWS Components](#aws-components)
+  - [EKS Components](#eks-components)
+- [Preparation and Pre-requisites](#preparation-and-pre-requisites)
+  - [Preparing a Python Virtual Environment](#preparing-a-python-virtual-environment)
+  - [AWS Account Preparations](#aws-account-preparations)
+
 # aws-eks-private
 
 CloudFormation Templates and Scripts to deploy EKS in a Private Only VPC
