@@ -21,8 +21,11 @@ The current status of this project is still in early development.
 The following must be available on your system:
 
 * Python 3.8.13 or later
-* AWS CLI 2.7.7 or later 
+* AWS CLI 2.7.7 or later ([installation instruction](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
 * Git version 2.36.1 or later
+* EksCtl 0.101.0 or later ([installation instruction](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html))
+* Kubectl client version 1.24 or later ([installation instruction](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/))
+* Docker version 20.10.16 or later
 
 _**Note**_: Older version of the software may work, but the versions above was used during the development and is therefore known to work
 
@@ -37,6 +40,8 @@ In terms of basic knowledge and experience that is required to follow along, con
 * Understand concepts like STDIN and STDOUT, pipes, redirection etc.
 * Know how to install software using a package manager (`apt` or `rpm` - based on your distribution of choice)
 * Have some basic prior experience in provisioning and using AWS services like `S3`, `EC2`, `Lambda` etc. Working knowledge of `CloudFormation` is also required. Be comfortable using the AWS CLI.
+* Have some prior working experience with Kubernetes clusters and be comfortable with tools like `kubectl`, `kustomize` etc.
+* Good working knowledge of Docker, including tagging images and uploading images to private repositories
 
 _**WARNING**_: Although a new AWS account has a free tier, the nature of EKS is not completely covered by the free tier, and some costs are expected. You can use the [AWS Pricing Calculator](https://calculator.aws/#/) to estimate your costs, assuming you have studied the CloudFormation templates and know which services will be created. Based on experience (from early 2022), you can expect around charges of less than US$10 per day of running all the stacks. You may also want to check out how you can [control your AWS costs as described in this AWS page](https://aws.amazon.com/getting-started/hands-on/control-your-costs-free-tier-budgets/)
 
@@ -77,4 +82,4 @@ export AWS_PAGER=less
 
 If you plan to use an EC2 instance to also deploy the CloudFormation stacks and run the other commands, note the pre-requisites listed above and ensure that it is also installed on the Instance.
 
-TODO - Provide an example CloudFOrmation template to provision an EC2 instance that can be used as Jump Host and from where all commands could be executed.
+TODO - Provide an example CloudFormation template to provision an EC2 instance that can be used as Jump Host and from where all commands could be executed.
