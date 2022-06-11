@@ -6,6 +6,7 @@
 - [Preparation and Pre-requisites](#preparation-and-pre-requisites)
   - [Preparing a Python Virtual Environment](#preparing-a-python-virtual-environment)
   - [AWS Account Preparations](#aws-account-preparations)
+    - [Bootstrapping a Public EC2 Jump Host (OPTIONAL)](#bootstrapping-a-public-ec2-jump-host-optional)
 
 # aws-eks-private
 
@@ -91,4 +92,24 @@ export AWS_PAGER=less
 
 If you plan to use an EC2 instance to also deploy the CloudFormation stacks and run the other commands, note the pre-requisites listed above and ensure that it is also installed on the Instance.
 
-TODO - Provide an example CloudFormation template to provision an EC2 instance that can be used as Jump Host and from where all commands could be executed.
+### Bootstrapping a Public EC2 Jump Host (OPTIONAL)
+
+In this section steps to create a Jump Host will be provided and explained.
+
+The following will be created:
+
+* An EC2 KeyPair ([more info](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)), with instructions on how to create, obtain and use the key.
+* An EC2 instance, based of an official Amazon EC2 distribution (AMI), with the Squid Proxy also installed (we will use this same instance as a Web Proxy server for instances in our Private only VPC). The image will include the following software:
+  * AWS CLI
+  * EksCtl
+  * Kubectl
+  * Git
+  * Vim
+  * curl
+  * Squid
+
+_**Note**_: Refer to [this page](https://aws.amazon.com/blogs/compute/query-for-the-latest-amazon-linux-ami-ids-using-aws-systems-manager-parameter-store/) on strategies for ensuring you are always launching the latest Amazon EC2 Linux Image (also referred to as an AMI, or Amazon Machine Image)
+
+_**Important**_: This version of the CloudFormation template creates an EC2 instance with no execution role attached. When logged in using SSH, the AWS credentials need to be set with environment variables (recommended) or with the appropriate credentials files in the `~/.aws/` directory.
+
+TODO - Provide an example CloudFormation template and scripts to provision an EC2 instance that can be used as Jump Host and from where all commands could be executed.
