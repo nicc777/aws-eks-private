@@ -1,0 +1,203 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  A multi purpose instance launch template  with primary function as Internet Proxy, but
+  also serving potentially as a Bastion host with SSH access allowed from the Internet
+
+# Metadata:
+#   template metadata
+
+Parameters:
+  KeyName:
+    Type: "AWS::EC2::KeyPair::KeyName"
+    Description: The EC2 Key Pair to allow SSH access to the instances
+  AwsEc2Ami:
+    Description: "Refer to https://aws.amazon.com/blogs/compute/query-for-the-latest-amazon-linux-ami-ids-using-aws-systems-manager-parameter-store/"
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  PrimarySubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  TargetVpc:
+    Type: AWS::EC2::VPC::Id
+  PublicVpcCidr:
+    Type: String
+    Default: "172.31.0.0/16"
+  PrivateVpcCidr:
+    Type: String
+    Default: "10.10.0.0/24"
+
+# Rules:
+#   set of rules
+
+# Mappings:
+#   set of mappings
+
+# Conditions:
+#   set of conditions
+
+# Transform:
+#   set of transforms
+
+Resources:
+
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties: 
+      GroupDescription: The Instance Host Security Group
+      GroupName: 
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - 'InstanceSecurityGroup'
+      VpcId: 
+        Ref: TargetVpc
+
+  SshIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: InstanceSecurityGroup
+    Properties: 
+      Description: Allow port 22/tcp (SSH)
+      FromPort: 22
+      ToPort: 22
+      GroupId: 
+        Ref: InstanceSecurityGroup
+      IpProtocol: tcp
+      CidrIp: 0.0.0.0/0
+
+  SquidIngressPublicVpc:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: InstanceSecurityGroup
+    Properties: 
+      Description: Allow port 22/tcp (SSH)
+      FromPort: 3128
+      ToPort: 3128
+      GroupId: 
+        Ref: InstanceSecurityGroup
+      IpProtocol: tcp
+      CidrIp: 
+        Ref: PublicVpcCidr
+
+  SquidIngressPrivateVpc:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: InstanceSecurityGroup
+    Properties: 
+      Description: Allow port 22/tcp (SSH)
+      FromPort: 3128
+      ToPort: 3128
+      GroupId: 
+        Ref: InstanceSecurityGroup
+      IpProtocol: tcp
+      CidrIp: 
+        Ref: PrivateVpcCidr
+
+  AllEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    DependsOn: InstanceSecurityGroup
+    Properties: 
+      Description: Allow all outgoing traffic
+      GroupId:
+        Ref: InstanceSecurityGroup
+      IpProtocol: -1
+      CidrIp: 0.0.0.0/0
+
+  ThisInstanceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - "sts:AssumeRole"
+      ManagedPolicyArns:
+      - Sub: "arn:aws:iam::aws:policy/AdministratorAccess"
+      Path: /
+      RoleName:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - 'ThisInstanceRole'
+
+  ThisInstanceIamProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      InstanceProfileName:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - 'ThisInstanceProfile'
+      Path: "/"
+      Roles: 
+        - Ref: ThisInstanceRole
+
+  InstanceHostLaunchTemplate:
+    Type: "AWS::EC2::LaunchTemplate"
+    Properties:
+      LaunchTemplateName:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - 'LaunchTemplate'
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - Ebs:
+              VolumeSize: 8
+              VolumeType: gp2
+              DeleteOnTermination: true
+              Encrypted: true
+            DeviceName: /dev/sda1
+        IamInstanceProfile: 
+          Ref: ThisInstanceIamProfile
+        ImageId:
+          Ref: AwsEc2Ami
+        InstanceType: t3.large
+        KeyName:
+          Ref: KeyName
+        SecurityGroupIds:
+        - Ref: InstanceSecurityGroup
+        MetadataOptions:
+          HttpTokens: required
+        UserData: 
+          Fn::Base64:
+            Fn::Sub: |
+              MIME-Version: 1.0
+              Content-Type: multipart/mixed; boundary="==BOUNDARY=="
+
+              --==BOUNDARY==
+              Content-Type: text/x-shellscript; charset="us-ascii"
+
+              #!/bin/bash
+              yum install -y squid telnet bind-utils nmap-ncat nmap mc python3 python3-pip python3-setuptools git
+
+              yum install -y docker
+              systemctl enable docker.service
+              systemctl enable containerd.service
+              systemctl start docker
+              systemctl enable squid.service
+              systemctl start squid
+
+              sudo usermod -aG docker ec2-user
+              
+              ## GitLab Docker
+              # GITLAB_HOME=/home/ec2-user
+              # mkdir -p $GITLAB_HOME/config $GITLAB_HOME/logs $GITLAB_HOME/data
+              # chown ec2-user $GITLAB_HOME/config $GITLAB_HOME/logs $GITLAB_HOME/data
+              # docker run --detach --hostname public-proxy.toetzen.priv --publish 0.0.0.0:4443:443 --publish 0.0.0.0:4480:80 --publish 0.0.0.0:4422:22 --name gitlab --restart always --volume $GITLAB_HOME/config:/etc/gitlab --volume $GITLAB_HOME/logs:/var/log/gitlab --volume $GITLAB_HOME/data:/var/opt/gitlab --shm-size 256m gitlab/gitlab-ce:latest
+
+              --==BOUNDARY==--
+
+Outputs:
+
+  InstanceHostLaunchTemplateId:
+    Description: "ID of InstanceHostLaunchTemplate"
+    Value:
+      Ref: InstanceHostLaunchTemplate
+    Export:
+      Name:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - "InstanceHostLaunchTemplateId"

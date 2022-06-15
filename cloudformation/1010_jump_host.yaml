@@ -1,0 +1,150 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  A multi purpose instance with primary function as Internet Proxy, but
+  also serving as a Bastion host with SSH access allowed from the Internet
+
+# Metadata:
+#   template metadata
+
+Parameters:
+  LaunchTemplateVersionNumber:
+    Type: String
+    Default: "1"
+  LaunchTemplateStackName:
+    Type: String
+  Route53HostedZoneId:
+    Type: String
+  PrivateRoute53HostedZoneId:
+    Type: String
+  DnsBaseDomainName:
+    Type: String
+    Description: "For example: example.tld"
+  PrivateDnsBaseDomainName:
+    Type: String
+    Description: "For example: example.tld"
+  Ec2InstanceDesiredName:
+    Type: String
+    Description: "The DNS hostname of the EC2 instance, for example my-instance. The full DNS name will be computed as my-instance.example.tld"
+    Default: "public-proxy"
+  
+
+# Rules:
+#   set of rules
+
+# Mappings:
+#   set of mappings
+
+# Conditions:
+#   set of conditions
+
+# Transform:
+#   set of transforms
+
+Resources:
+
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      LaunchTemplate:
+        LaunchTemplateId: 
+          Fn::ImportValue:
+            Fn::Sub: '${LaunchTemplateStackName}-InstanceHostLaunchTemplateId'
+        Version:
+          Ref: LaunchTemplateVersionNumber
+      Tags:
+        - Key: Name
+          Value:
+            Ref: Ec2InstanceDesiredName
+        
+
+  Ec2InstanceDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: 
+        Ref: Route53HostedZoneId
+      Name: 
+        Sub: '${Ec2InstanceDesiredName}.${DnsBaseDomainName}'
+      ResourceRecords:
+      - Fn::GetAtt: 
+        - "Ec2Instance"
+        - "PublicIp"
+      TTL: 300
+      Type: A
+
+  Ec2InstancePrivateDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: 
+        Ref: PrivateRoute53HostedZoneId
+      Name: 
+        Sub: '${Ec2InstanceDesiredName}.${PrivateDnsBaseDomainName}'
+      ResourceRecords:
+      - Fn::GetAtt: 
+        - "Ec2Instance"
+        - "PrivateIp"
+      TTL: 300
+      Type: A
+
+
+Outputs:
+
+  Ec2InstanceId:
+    Description: "ID of Ec2Instance"
+    Value: 
+      Ref: Ec2Instance
+    Export:
+      Name:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - "Ec2InstanceId"
+
+  Ec2InstancePublicIpAddress:
+    Description: "ID of Ec2Instance"
+    Value:
+      Fn::GetAtt: 
+      - "Ec2Instance"
+      - "PublicIp"
+    Export:
+      Name:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - "Ec2InstancePublicIpAddress"
+
+  Ec2InstancePublicDomainName:
+    Description: "Public Domain Name of Ec2Instance"
+    Value: 
+      Sub: '${Ec2InstanceDesiredName}.${DnsBaseDomainName}'
+    Export:
+      Name:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - "Ec2InstancePublicDomainName"
+
+  Ec2InstancePrivateIpAddress:
+    Description: "ID of Ec2Instance"
+    Value:
+      Fn::GetAtt: 
+      - "Ec2Instance"
+      - "PrivateIp"
+    Export:
+      Name:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - "Ec2InstancePrivateIpAddress"
+
+  Ec2InstancePrivateDomainName:
+    Description: "Private Domain Name of Ec2Instance"
+    Value: 
+      Sub: '${Ec2InstanceDesiredName}.${PrivateDnsBaseDomainName}'
+    Export:
+      Name:
+        Fn::Join:
+        - '-'
+        - - Ref: AWS::StackName
+          - "Ec2InstancePrivateDomainName"
