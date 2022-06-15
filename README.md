@@ -6,6 +6,7 @@
 - [Preparation and Pre-requisites](#preparation-and-pre-requisites)
   - [Preparing a Python Virtual Environment](#preparing-a-python-virtual-environment)
   - [AWS Account Preparations](#aws-account-preparations)
+    - [Route 53 Zone](#route-53-zone)
     - [Bootstrapping a Public EC2 Jump Host (OPTIONAL)](#bootstrapping-a-public-ec2-jump-host-optional)
 
 # aws-eks-private
@@ -91,6 +92,33 @@ export AWS_PAGER=less
 > Once you log out of the EC2 terminal session, or when the EC2 instance is stopped, the environment variables are deleted.
 
 If you plan to use an EC2 instance to also deploy the CloudFormation stacks and run the other commands, note the pre-requisites listed above and ensure that it is also installed on the Instance.
+
+### Route 53 Zone
+
+A route 53 zone is assumed to pre-exist. This project does not create a new zone.
+
+To obtain a list of your hosted zones, run the following command:
+
+```shell
+aws route53 list-hosted-zones
+```
+
+Example output:
+
+```yaml
+HostedZones:
+- CallerReference: XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+  Config:
+    Comment: my personal site
+    PrivateZone: false
+  Id: /hostedzone/XXXXXXXXXXXXXX
+  Name: example.tld.
+  ResourceRecordSetCount: 8
+```
+
+You will need the `Id` value from one _PUBLIC_ zone and one _PRIVATE_ you want to use. DNS records for the Jump host will be added to these zones.
+
+The private zone is used by hosts in the EKS VPC to resolve the HTTP Proxy host.
 
 ### Bootstrapping a Public EC2 Jump Host (OPTIONAL)
 
