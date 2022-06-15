@@ -387,28 +387,28 @@
                     <mxGeometry x="520" y="800" width="78" height="78" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-46" value="" style="sketch=0;html=1;aspect=fixed;shadow=0;align=center;verticalAlign=top;shape=mxgraph.gcp2.check;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="808" width="37.5" height="30" as="geometry"/>
+                    <mxGeometry x="808" y="-78" width="37.5" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-47" value="In Progress" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="860" width="84.5" height="30" as="geometry"/>
+                    <mxGeometry x="860" y="-78" width="84.5" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-48" value="" style="sketch=0;html=1;aspect=fixed;shadow=0;align=center;verticalAlign=top;shape=mxgraph.gcp2.check;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="808" y="50" width="37.5" height="30" as="geometry"/>
+                    <mxGeometry x="808" y="-28" width="37.5" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-49" value="Implemented" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="860" y="50" width="84.5" height="30" as="geometry"/>
+                    <mxGeometry x="860" y="-28" width="84.5" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-50" value="" style="sketch=0;html=1;aspect=fixed;shadow=0;align=center;verticalAlign=top;shape=mxgraph.gcp2.check;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="808" y="110" width="37.5" height="30" as="geometry"/>
+                    <mxGeometry x="808" y="32" width="37.5" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-51" value="Partially Implemented" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="860" y="110" width="120" height="30" as="geometry"/>
+                    <mxGeometry x="860" y="32" width="120" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-52" value="" style="sketch=0;html=1;aspect=fixed;shadow=0;align=center;verticalAlign=top;shape=mxgraph.gcp2.check;fillColor=#0050ef;fontColor=#ffffff;strokeColor=#001DBC;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="808" y="170" width="37.5" height="30" as="geometry"/>
+                    <mxGeometry x="808" y="92" width="37.5" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-53" value="Pre-Existing" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
-                    <mxGeometry x="860" y="170" width="120" height="30" as="geometry"/>
+                    <mxGeometry x="860" y="92" width="120" height="30" as="geometry"/>
                 </mxCell>
                 <mxCell id="aiBb2gHxXjBJEJnZ1w2l-57" value="PublicProxy" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#945DF2;gradientDirection=north;fillColor=#5A30B5;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.route_53;" vertex="1" parent="LqjgguTIqTyeok_0b6uu-1">
                     <mxGeometry x="-40" y="-78" width="78" height="78" as="geometry"/>
