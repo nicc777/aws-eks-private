@@ -13,11 +13,17 @@
 
 CloudFormation Templates and Scripts to deploy EKS in a Private Only VPC
 
+> The current status of this project is still in early development.
+
+This is a reference implementation I personally use as a base for projects requiring some or all of the components as described.
+
+_**Please Note**_: There are several approaches to solve various problems, and this design and implementation does not claim in anyway to be the best or only right way. It is an implementation that satisfies some specific requirements for myself.
+
+If you want to improve or contribute, please consider engaging in conversation or open an issue or submit a pull request.
+
 # Overview
 
 This repository aims to include resources and supporting scripts and documentation to deploy and maintain an AWS EKS Cluster deployed in a Private Network only.
-
-The current status of this project is still in early development.
 
 ## AWS Components
 
