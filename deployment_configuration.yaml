@@ -18,7 +18,7 @@ deployment:
   sandbox-full-unittest:
     unitTestProfile: true
     tasks:
-    - launchTemplateForEc2WithProxy
+    - launchTemplateForEc2WithProxyUnitTest
     profileGlobalVariableOverrides:
       privateVpcCidr: 10.20.0.0/24
       logFilename: deployment-${build-variable:build_uuid}-unittest.log
@@ -54,6 +54,22 @@ tasks:
     preLaunchScript: |
       echo "Starting on task ${build-variable:current_task_name}"
       python3 scripts/provision_ssh_keypair.py --key-pair-name="${build-variable:build_uuid}"
+    postLaunchScript: |
+      echo "Successfully deployed template ${ref:tasks.launchTemplateForEc2WithProxy.template}"
+    taskDependsOn: None     # Another named task that this task depends on. These tasks have to run successfully before this task will execute
+  launchTemplateForEc2WithProxyUnitTest:
+    template: cloudformation/1000_launch_template_with_proxy.yaml
+    deploymentName: proxyHostLaunchTemplate
+    parameters:
+      KeyName: ${ref:globalVariables.ec2KeyPairName}
+      PrimarySubnetIds: ${func:get_default_vpc(get_vpc_id=True, get_vpc_cidr=False, get_vpc_public_subnet_ids=True, get_vpc_private_subnet_ids=False)}
+      TargetVpc: ${func:get_default_vpc(get_vpc_id=True, get_vpc_cidr=False, get_vpc_public_subnet_ids=False, get_vpc_private_subnet_ids=False)}
+      PublicVpcCidr: ${func:get_default_vpc(get_vpc_id=False, get_vpc_cidr=True, get_vpc_public_subnet_ids=False, get_vpc_private_subnet_ids=False)}
+      PrivateVpcCidr: ${ref:globalVariables.privateVpcCidr}
+    changeSetIfExists: true
+    preLaunchScript: |
+      echo "Starting on task ${build-variable:current_task_name}"
+      # echo "MOCK RUNNING: python3 scripts/provision_ssh_keypair.py --key-pair-name=\"${build-variable:build_uuid}\""
     postLaunchScript: |
       echo "Successfully deployed template ${ref:tasks.launchTemplateForEc2WithProxy.template}"
     taskDependsOn: None     # Another named task that this task depends on. These tasks have to run successfully before this task will execute
