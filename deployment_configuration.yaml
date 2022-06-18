@@ -1,0 +1,60 @@
+# Define deployments - when the deployment script runs, you need to supply a profile name and environment. 
+deployment:
+  sandbox-full-live:                  # A unique name for this profile
+    unitTestProfile: false            # If this is a profile to use for unit tests, set to true
+    tasks:                            # List of tasks to include in this deployment profile
+    - launchTemplateForEc2WithProxy   # Task must be defined under tasks
+    profileGlobalVariableOverrides:   # Overrides globalVariables
+      privateVpcCidr: 10.20.0.0/24    # If privateVpcCidr is defined in globalVariables, it will now have this value for this profile
+      logFilename: deployment-${build-variable:build_uuid}-live.log
+      logLevel: info
+    dependsOnProfile:                 # List of dependant profiles that will be run first. Only of all dependant profiles complete successfully will this profile run
+    - sandbox-full-unittest           # Run this profile only after the unittest profile completed successfully
+    preLaunchScript: |
+      echo "Running unit tests on deployment ${build-variable:current_deployment_name}"
+    postLaunchScript: |
+      echo "Successfully completed unit tests for deployment ${build-variable:current_deployment_name}"
+    boto3ClientConfiguration: liveDeployments
+  sandbox-full-unittest:
+    unitTestProfile: true
+    tasks:
+    - launchTemplateForEc2WithProxy
+    profileGlobalVariableOverrides:
+      privateVpcCidr: 10.20.0.0/24
+      logFilename: deployment-${build-variable:build_uuid}-unittest.log
+      logLevel: debug
+    dependsOnProfile: None
+    preLaunchScript: |
+      echo "Running unit tests on deployment ${build-variable:current_deployment_name}"
+    postLaunchScript: |
+      echo "Successfully completed unit tests for deployment ${build-variable:current_deployment_name}"
+    boto3ClientConfiguration: unitTesting
+
+
+# Define global variables that can be referenced in tasks by ${ref:globalVariables.variableName}. If a correspondingly named variable is in the deployment profile profileGlobalVariableOverrides, that value will be used instead
+globalVariables:
+  privateVpcCidr: 10.10.0.0/24
+  awsRegion: eu-central-1
+  awsAccountId: ${env:AWS_REGION}
+  ec2KeyPairName: my-keypair-${build-variable:build_uuid}   # Refer to https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html - maximum 255 characters. Build UUID takes 64 (SHA256 Hex Digest)
+  logFilename: deployment-${build-variable:build_uuid}.log
+  logLevel: debug
+
+tasks:
+  launchTemplateForEc2WithProxy:
+    template: cloudformation/1000_launch_template_with_proxy.yaml
+    deploymentName: proxyHostLaunchTemplate
+    parameters:
+      KeyName: ${ref:globalVariables.ec2KeyPairName}
+      PrimarySubnetIds: ${func:get_default_vpc(get_vpc_id=True, get_vpc_cidr=False, get_vpc_public_subnet_ids=True, get_vpc_private_subnet_ids=False)}
+      TargetVpc: ${func:get_default_vpc(get_vpc_id=True, get_vpc_cidr=False, get_vpc_public_subnet_ids=False, get_vpc_private_subnet_ids=False)}
+      PublicVpcCidr: ${func:get_default_vpc(get_vpc_id=False, get_vpc_cidr=True, get_vpc_public_subnet_ids=False, get_vpc_private_subnet_ids=False)}
+      PrivateVpcCidr: ${ref:globalVariables.privateVpcCidr}
+    changeSetIfExists: true
+    preLaunchScript: |
+      echo "Starting on task ${build-variable:current_task_name}"
+      python3 scripts/provision_ssh_keypair.py --key-pair-name="${build-variable:build_uuid}"
+    postLaunchScript: |
+      echo "Successfully deployed template ${ref:tasks.launchTemplateForEc2WithProxy.template}"
+    taskDependsOn: None     # Another named task that this task depends on. These tasks have to run successfully before this task will execute
+
