@@ -7,6 +7,9 @@
   - [Preparing a Python Virtual Environment](#preparing-a-python-virtual-environment)
   - [AWS Account Preparations](#aws-account-preparations)
     - [Route 53 Zone](#route-53-zone)
+    - [Create an EC2 Key Pair](#create-an-ec2-key-pair)
+      - [Method 1 - Create a Key Pair and Store Locally with Optional Upload to AWS SecretsManager](#method-1---create-a-key-pair-and-store-locally-with-optional-upload-to-aws-secretsmanager)
+      - [Method 2: CReate an EC2 Key Pair without Saving Locally](#method-2-create-an-ec2-key-pair-without-saving-locally)
     - [Bootstrapping a Public EC2 Jump Host (OPTIONAL)](#bootstrapping-a-public-ec2-jump-host-optional)
 
 # aws-eks-private
@@ -125,6 +128,59 @@ HostedZones:
 You will need the `Id` value from one _PUBLIC_ zone and one _PRIVATE_ you want to use. DNS records for the Jump host will be added to these zones.
 
 The private zone is used by hosts in the EKS VPC to resolve the HTTP Proxy host.
+
+### Create an EC2 Key Pair
+
+Ensure you have an EC2 Key Pair.
+
+#### Method 1 - Create a Key Pair and Store Locally with Optional Upload to AWS SecretsManager
+
+Below is an example of how such a key can be created and stored in AWS SecretsManager for later retrieval on any platform you may use:
+
+```shell
+# Create a Key - we need to get the content of the KeyMaterial into a file
+aws ec2 create-key-pair --key-name test-key-1 | jq '.KeyMaterial' | sed 's/\\n/\n/g' | sed 's/\"//g' > test-key-1
+
+# Create a secret with this file content (OPTIONAL)
+python3 scripts/create_aws_secret.py -r "eu-central-1" -n "ec2-private-key-test-key-1" -s test-key-1 -d "A test key for EC2"
+
+# Remove the local key (OPTIONAL)
+rm -vf test-key-1
+```
+
+The expected output from the script will be something like:
+
+```text
+2022-06-18 08:31:12,396 - __main__ - INFO - DEBUG=False
+2022-06-18 08:31:12,423 - __main__ - INFO - Read NNNN bytes.
+2022-06-18 08:31:12,605 - __main__ - INFO - ARN: arn:aws:secretsmanager:eu-central-1:XXXXXXXXXXXX:secret:ec2-private-key-test-key-2-XXXXXX
+2022-06-18 08:31:12,605 - __main__ - INFO - DONE
+```
+
+You may need to take note of the ARN if you would like to use this key in the rest of this project.
+
+#### Method 2: CReate an EC2 Key Pair without Saving Locally
+
+The following script will create a new EC2 key pair and store it in AWS SecretsManager. A local copy of the key will not be created.
+
+```shell
+python3 scripts/provision_ssh_keypair.py --key-pair-name="test-key-3"
+```
+
+Example output:
+
+```text
+Secret created. ARN=arn:aws:secretsmanager:eu-central-1:XXXXXXXXXXXX:secret:ec2_key_pair_test-key-3-XXXXXX
+DONE
+```
+
+Later, when you need to put that key on another system, run the following command on that system (assuming this repository is cloned on that system):
+
+```shell
+python3 scripts/create_local_ssh_private_key.py --secret_id="ec2_key_pair_test-key-3-XXXXXX" --aws_account_id="XXXXXXXXXXXX" --key-pair-name="test-key-3" --output-file="some/path/TEST_KEY"
+```
+
+The script will also validate that the EC2 key pair named in the parameter `--key-pair-name` does exist.
 
 ### Bootstrapping a Public EC2 Jump Host (OPTIONAL)
 
